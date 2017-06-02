@@ -5,11 +5,6 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.telenor.connect.id.ConnectIdService;
 import com.telenor.connect.utils.RestHelper;
-import com.telenor.mobileconnect.MobileConnectSdkProfile;
-import com.telenor.mobileconnect.operatordiscovery.OperatorDiscoveryAPI;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
