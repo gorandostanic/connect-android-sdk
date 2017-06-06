@@ -6,9 +6,10 @@ import android.os.Build;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.telenor.connect.sms.HtmlToAndroidInstructionsInterface;
-import com.telenor.connect.ui.ConnectWebViewClient;
+import com.telenor.connect.ui.InstructionHandler;
 
 public class WebViewHelper {
 
@@ -18,9 +19,9 @@ public class WebViewHelper {
     // 2. We need JS for the web page.
     @SuppressLint({"AddJavascriptInterface", "SetJavaScriptEnabled"})
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void setupWebView(
+    public static void setupWebView (
             final WebView webView,
-            ConnectWebViewClient client,
+            WebViewClient client,
             final String pageToLoad) {
 
         webView.setWebViewClient(client);
@@ -32,8 +33,11 @@ public class WebViewHelper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
         }
-        webView.addJavascriptInterface(
-                new HtmlToAndroidInstructionsInterface(client), "AndroidInterface");
+        if (client instanceof InstructionHandler) {
+            webView.addJavascriptInterface(
+                    new HtmlToAndroidInstructionsInterface((InstructionHandler) client),
+                    "AndroidInterface");
+        }
         webView.setFocusable(true);
         webView.setFocusableInTouchMode(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

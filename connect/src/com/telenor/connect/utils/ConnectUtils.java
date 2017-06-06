@@ -19,6 +19,16 @@ public class ConnectUtils {
     public static final String CUSTOM_LOADING_SCREEN_EXTRA
             = "com.telenor.connect.CUSTOM_LOADING_SCREEN_EXTRA";
     public static final String WELL_KNOWN_CONFIG_EXTRA = "com.telenor.connect.WELL_KNOWN_CONFIG";
+    public static final String PREFERENCES_FILE = "com.telenor.connect.PREFERENCES_FILE";
+
+    public static final String OPERATOR_SELECTION_URI =
+            "com.telenor.mobileconnect.OPERATOR_SELECTION_URI";
+    public static final String OPERATOR_SELECTION_ACTION =
+            "com.telenor.mobileconnect.OPERATOR_SELECTION_ACTION";
+
+    public static final String PARAM_SNAPHOT_EXTRA = "com.telenor.connect.PARAM_SNAPSHOT";
+    public static final String UI_LOCALES_SNAPHOT_EXTRA = "com.telenor.connect.UI_LOCALES_SNAPSHOT";
+    public static final String REQUEST_CODE_EXTRA = "com.telenor.connect.REQUEST_CODE";
 
     public static void parseAuthCode(String callbackUrl, ConnectCallback callback) {
         Validator.notNullOrEmpty(callbackUrl, "callbackUrl");

@@ -1,7 +1,9 @@
 package com.telenor.connect.utils;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -21,6 +23,10 @@ import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = "src/main/AndroidManifest.xml", sdk = 18)
@@ -145,7 +151,13 @@ public class ConnectUrlHelperTest {
                 .host("connect.telenordigital.com")
                 .build();
 
-            ConnectSdkProfile profile = new ConnectSdkProfile(null, false, false);
+        SharedPreferences sharedPreferencesMock = mock(SharedPreferences.class);
+        when(sharedPreferencesMock.getString(anyString(), anyString())).thenReturn(null);
+        Context contextMock = mock(Context.class);
+        when(contextMock.getSharedPreferences(anyString(), anyInt()))
+                .thenReturn(sharedPreferencesMock);
+
+        ConnectSdkProfile profile = new ConnectSdkProfile(contextMock, false, false);
         profile.setClientId("client-id-example");
         profile.setRedirectUri("redirect-url://here");
         Uri authorizeUri = profile.getAuthorizeUri(parameters, locales);

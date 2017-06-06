@@ -47,6 +47,8 @@ import retrofit.Callback;
 
 public final class ConnectSdk {
 
+    public static final int NO_CUSTOM_LAYOUT = -1;
+
     private static String sLastAuthState;
     private static ArrayList<Locale> sLocales;
     private static String sPaymentCancelUri;
@@ -116,20 +118,7 @@ public final class ConnectSdk {
             final Activity activity,
             final Map<String, String> parameters,
             final int requestCode) {
-        Validator.sdkInitialized();
-        sdkProfile.onStartAuthorization(new SdkProfile.OnStartAuthorizationCallback() {
-            @Override
-            public void onSuccess() {
-                Intent intent = getAuthIntent(parameters);
-                activity.startActivityForResult(intent, requestCode);
-            }
-
-            @Override
-            public void onError() {
-                showAuthCancelMessage(activity);
-            }
-        });
-
+        authenticate(activity, parameters, NO_CUSTOM_LAYOUT, requestCode);
     }
 
     private static Intent getAuthIntent(Map<String, String> parameters) {
@@ -142,17 +131,26 @@ public final class ConnectSdk {
         return intent;
     }
 
-    public static synchronized void authenticate(final Activity activity,
-                                                 final Map<String, String> parameters,
-                                                 final int customLoadingLayout,
-                                                 final int requestCode) {
+    public static synchronized void authenticate(
+            final Activity activity,
+            final Map<String, String> parameters,
+            final int customLoadingLayout,
+            final int requestCode) {
+
         Validator.sdkInitialized();
-        sdkProfile.onStartAuthorization(new SdkProfile.OnStartAuthorizationCallback() {
+        sdkProfile.onStartAuthorization(
+                parameters,
+                getUiLocales(),
+                new SdkProfile.OnStartAuthorizationCallback() {
             @Override
-            public void onSuccess() {
-                Intent intent = getAuthIntent(parameters);
-                intent.putExtra(ConnectUtils.CUSTOM_LOADING_SCREEN_EXTRA, customLoadingLayout);
-                activity.startActivityForResult(intent, requestCode);
+            public void onSuccess(Intent nextIntent) {
+                if (customLoadingLayout != NO_CUSTOM_LAYOUT) {
+                    nextIntent.putExtra(
+                            ConnectUtils.CUSTOM_LOADING_SCREEN_EXTRA,
+                            customLoadingLayout);
+                }
+                nextIntent.putExtra(ConnectUtils.REQUEST_CODE_EXTRA, requestCode);
+                activity.startActivityForResult(nextIntent, requestCode);
             }
 
             @Override
@@ -162,7 +160,7 @@ public final class ConnectSdk {
         });
     }
 
-    private static void showAuthCancelMessage(Activity activity) {
+    public static void showAuthCancelMessage(Activity activity) {
         Toast.makeText(
                 activity,
                 R.string.com_telenor_authorization_cancelled,
@@ -178,6 +176,7 @@ public final class ConnectSdk {
      */
     public static Fragment getAuthFragment(Map<String, String> parameters) {
         Validator.sdkInitialized();
+        Validator.connectIdOnly();
 
         final Fragment fragment = new ConnectWebFragment();
         Intent authIntent = getAuthIntent(parameters);
@@ -205,7 +204,7 @@ public final class ConnectSdk {
 
     public static synchronized String getAccessToken() {
         Validator.sdkInitialized();
-        if (sdkProfile.isInitialized()) {
+        if (sdkProfile.getConnectIdService() != null) {
             return sdkProfile.getConnectIdService().getAccessToken();
         }
         return null;
