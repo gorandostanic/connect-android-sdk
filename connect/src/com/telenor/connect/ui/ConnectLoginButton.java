@@ -19,9 +19,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConnectLoginButton extends ConnectButton {
+import static com.telenor.connect.ConnectSdk.NO_CUSTOM_LAYOUT;
 
-    private static final int NO_CUSTOM_LAYOUT = -1;
+public class ConnectLoginButton extends ConnectButton {
 
     private ArrayList<String> acrValues;
     private Map<String, String> loginParameters;
@@ -124,14 +124,11 @@ public class ConnectLoginButton extends ConnectButton {
                 parameters.putAll(getLoginParameters());
             }
 
-            if (customLoadingLayout == NO_CUSTOM_LAYOUT) {
-                ConnectSdk.authenticate(getActivity(), parameters, requestCode);
-            } else {
-                ConnectSdk.authenticate(getActivity(),
-                        parameters,
-                        customLoadingLayout,
-                        requestCode);
-            }
+            ConnectSdk.authenticate(
+                    getActivity(),
+                    parameters,
+                    customLoadingLayout,
+                    requestCode);
         }
     }
 }

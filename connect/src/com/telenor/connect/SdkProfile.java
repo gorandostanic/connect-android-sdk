@@ -1,6 +1,7 @@
 package com.telenor.connect;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 
 import com.squareup.okhttp.HttpUrl;
@@ -24,10 +25,13 @@ public interface SdkProfile {
     WellKnownAPI.WellKnownConfig getWellKnownConfig();
     boolean isInitialized();
 
-    void onStartAuthorization(OnStartAuthorizationCallback callback);
+    void onStartAuthorization(
+            Map<String, String> parameters,
+            List<String> uiLocales,
+            OnStartAuthorizationCallback callback);
 
     interface OnStartAuthorizationCallback {
-        void onSuccess();
+        void onSuccess(Intent nextIntent);
         void onError();
     }
 

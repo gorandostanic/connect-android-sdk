@@ -85,8 +85,11 @@ public class ConnectSdkProfile extends AbstractSdkProfile {
     }
 
     @Override
-    public void onStartAuthorization(OnStartAuthorizationCallback callback) {
-        initializeAndContinueAuthorizationFlow(callback);
+    public void onStartAuthorization(
+            Map<String, String> parameters,
+            List<String> uiLocales,
+            OnStartAuthorizationCallback callback) {
+        initializeAndContinueAuthorizationFlow(parameters, uiLocales, callback);
     }
 
     @Override
