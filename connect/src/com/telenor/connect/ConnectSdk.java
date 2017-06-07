@@ -142,21 +142,21 @@ public final class ConnectSdk {
                 parameters,
                 getUiLocales(),
                 new SdkProfile.OnStartAuthorizationCallback() {
-            @Override
-            public void onSuccess(Intent nextIntent) {
-                if (customLoadingLayout != NO_CUSTOM_LAYOUT) {
-                    nextIntent.putExtra(
-                            ConnectUtils.CUSTOM_LOADING_SCREEN_EXTRA,
-                            customLoadingLayout);
-                }
-                nextIntent.putExtra(ConnectUtils.REQUEST_CODE_EXTRA, requestCode);
-                activity.startActivityForResult(nextIntent, requestCode);
-            }
+                    @Override
+                    public void onSuccess(Intent nextIntent) {
+                        if (customLoadingLayout != NO_CUSTOM_LAYOUT) {
+                            nextIntent.putExtra(
+                                    ConnectUtils.CUSTOM_LOADING_SCREEN_EXTRA,
+                                    customLoadingLayout);
+                        }
+                        nextIntent.putExtra(ConnectUtils.REQUEST_CODE_EXTRA, requestCode);
+                        activity.startActivityForResult(nextIntent, requestCode);
+                    }
 
-            @Override
-            public void onError() {
-                showAuthCancelMessage(activity);
-            }
+                    @Override
+                    public void onError() {
+                        showAuthCancelMessage(activity);
+                    }
         });
     }
 

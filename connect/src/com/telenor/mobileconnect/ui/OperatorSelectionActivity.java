@@ -65,13 +65,12 @@ public class OperatorSelectionActivity extends AbstractConnectSdkActivity {
                         if (!isConnectActivity(nextIntent)) {
                             throw new RuntimeException("Wrong intent.");
                         }
-                        Activity activity = OperatorSelectionActivity.this;
                         if (customLoadingLayout != ConnectSdk.NO_CUSTOM_LAYOUT) {
                             nextIntent.putExtra(
                                     ConnectUtils.CUSTOM_LOADING_SCREEN_EXTRA,
                                     customLoadingLayout);
                         }
-                        activity.startActivityForResult(nextIntent, requestCode);
+                        startActivityForResult(nextIntent, requestCode);
                     }
 
                     @Override
