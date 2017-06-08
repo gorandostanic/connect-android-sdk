@@ -7,14 +7,13 @@ import android.text.TextUtils;
 
 import com.squareup.okhttp.HttpUrl;
 import com.telenor.connect.BuildConfig;
-import com.telenor.connect.ConnectSdk;
-import com.telenor.connect.ConnectSdkProfile;
-import com.telenor.mobileconnect.MobileConnectSdkProfile;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.telenor.connect.utils.ConnectUtils.OPERATOR_SELECTION_ACTION;
+import static com.telenor.connect.utils.ConnectUtils.OPERATOR_SELECTION_URI;
 
 public class ConnectUrlHelper {
 
@@ -33,6 +32,11 @@ public class ConnectUrlHelper {
             }
             return arguments.getString(ConnectUtils.LOGIN_AUTH_URI);
         }
+
+        if (OPERATOR_SELECTION_ACTION.equals(arguments.getString(ACTION_ARGUMENT))) {
+            return arguments.getString(OPERATOR_SELECTION_URI);
+        }
+
         throw new IllegalStateException("An invalid action was used to start a Connect Activity.");
     }
 

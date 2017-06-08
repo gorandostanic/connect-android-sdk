@@ -1,6 +1,7 @@
 package com.telenor.mobileconnect;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -15,13 +16,16 @@ import com.telenor.connect.id.ConnectTokensTO;
 import com.telenor.connect.id.TokenStore;
 import com.telenor.connect.id.UserInfo;
 import com.telenor.connect.utils.ConnectUrlHelper;
+import com.telenor.connect.utils.ConnectUtils;
 import com.telenor.connect.utils.RestHelper;
 import com.telenor.mobileconnect.id.MobileConnectAPI;
 import com.telenor.mobileconnect.operatordiscovery.OperatorDiscoveryAPI;
 import com.telenor.mobileconnect.operatordiscovery.OperatorDiscoveryConfig;
+import com.telenor.mobileconnect.ui.ConnectActivityDelegateWithOperatorSelection;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +40,6 @@ public class MobileConnectSdkProfile extends AbstractSdkProfile {
 
     private OperatorDiscoveryConfig operatorDiscoveryConfig;
     private volatile OperatorDiscoveryAPI.OperatorDiscoveryResult operatorDiscoveryResult;
-    private volatile OperatorDiscoveryAPI operatorDiscoveryApi;
     private final OperatorDiscoveryConfigStore lastSeenStore = new OperatorDiscoveryConfigStore();
 
     public MobileConnectSdkProfile(
@@ -110,10 +113,13 @@ public class MobileConnectSdkProfile extends AbstractSdkProfile {
     }
 
     @Override
-    public void onStartAuthorization(final OnStartAuthorizationCallback callback) {
+    public void onStartAuthorization(
+            final Map<String, String> parameters,
+            final List<String> uiLocales,
+            final OnStartAuthorizationCallback callback) {
 
         if (isInitialized()) {
-            callback.onSuccess();
+            callback.onSuccess(getAuthIntent(parameters, uiLocales));
             return;
         }
 
@@ -121,7 +127,7 @@ public class MobileConnectSdkProfile extends AbstractSdkProfile {
         String networkOperator = phMgr.getNetworkOperator();
 
         if (TextUtils.isEmpty(networkOperator)) {
-            callback.onError();
+            handleOperatorDiscoveryFailure(parameters, uiLocales, callback);
             return;
         }
 
@@ -135,7 +141,80 @@ public class MobileConnectSdkProfile extends AbstractSdkProfile {
                 new Callback<OperatorDiscoveryAPI.OperatorDiscoveryResult>() {
                     @Override
                     public void success(OperatorDiscoveryAPI.OperatorDiscoveryResult operatorDiscoveryResult, Response response) {
-                        initAndContinue(operatorDiscoveryResult, callback);
+                        initAndContinue(operatorDiscoveryResult, parameters, uiLocales, callback);
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        handleOperatorDiscoveryFailure(parameters, uiLocales, callback);
+                    }
+                });
+    }
+
+    private void handleOperatorDiscoveryFailure(
+            final Map<String, String> parameters,
+            final List<String> uiLocales,
+            final OnStartAuthorizationCallback callback) {
+        getOperatorDiscoveryApi().getOperatorSelectionResult(
+                getOperatorDiscoveryAuthHeader(),
+                operatorDiscoveryConfig.getOperatorDiscoveryRedirectUri(),
+                new Callback<OperatorDiscoveryAPI.OperatorSelectionResult>() {
+                    @Override
+                    public void success(
+                            OperatorDiscoveryAPI.OperatorSelectionResult operatorSelectionResult,
+                            Response response) {
+                        String endpoint = operatorSelectionResult.getEndpoint();
+                        if (endpoint == null) {
+                            callback.onError();
+                            return;
+                        }
+                        final Intent intent = new Intent(
+                                getContext(),
+                                ConnectActivityDelegateWithOperatorSelection.class
+                        );
+                        intent.setAction(ConnectUtils.OPERATOR_SELECTION_ACTION);
+                        intent.putExtra(ConnectUtils.OPERATOR_SELECTION_URI, endpoint);
+                        intent.putExtra(
+                                ConnectUtils.PARAM_SNAPHOT_EXTRA,
+                                new HashMap<>(parameters));
+                        intent.putExtra(
+                                ConnectUtils.UI_LOCALES_SNAPHOT_EXTRA,
+                                new ArrayList<>(uiLocales));
+                        callback.onSuccess(intent);
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        callback.onError();
+                    }
+                });
+    }
+
+    public synchronized void onStartAuthorization(
+            final Map<String, String> parameters,
+            final List<String> uiLocales,
+            final String mcc,
+            final String mnc,
+            final String subscriberId,
+            final OnStartAuthorizationCallback callback) {
+
+        if (subscriberId != null) {
+            parameters.put(
+                    "login_hint",
+                    String.format("ENCR_MSISDN:%s", subscriberId));
+        }
+
+        getOperatorDiscoveryApi().getOperatorDiscoveryResult_ForMccMnc(
+                getOperatorDiscoveryAuthHeader(),
+                operatorDiscoveryConfig.getOperatorDiscoveryRedirectUri(),
+                mcc,
+                mnc,
+                new Callback<OperatorDiscoveryAPI.OperatorDiscoveryResult>() {
+                    @Override
+                    public void success(
+                            OperatorDiscoveryAPI.OperatorDiscoveryResult operatorDiscoveryResult,
+                            Response response) {
+                        initAndContinue(operatorDiscoveryResult, parameters, uiLocales, callback);
                     }
 
                     @Override
@@ -160,10 +239,12 @@ public class MobileConnectSdkProfile extends AbstractSdkProfile {
 
     private void initAndContinue(
             OperatorDiscoveryAPI.OperatorDiscoveryResult odResult,
+            Map<String, String> parameters,
+            List<String> uiLocales,
             OnStartAuthorizationCallback callback) {
         operatorDiscoveryResult = odResult;
         setConnectIdService(createConnectIdService());
-        initializeAndContinueAuthorizationFlow(callback);
+        initializeAndContinueAuthorizationFlow(parameters, uiLocales, callback);
     }
 
     private ConnectIdService createConnectIdService() {
@@ -183,7 +264,6 @@ public class MobileConnectSdkProfile extends AbstractSdkProfile {
 
     public void deInitialize() {
         super.deInitialize();
-        operatorDiscoveryApi = null;
         setInitialized(false);
     }
 
