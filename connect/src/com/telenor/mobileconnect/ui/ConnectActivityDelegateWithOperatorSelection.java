@@ -16,7 +16,7 @@ import com.telenor.mobileconnect.MobileConnectSdkProfile;
 import java.util.List;
 import java.util.Map;
 
-public class ConnectActivityWithOperatorSelectionDelegate extends AbstractConnectSdkActivity {
+public class ConnectActivityDelegateWithOperatorSelection extends AbstractConnectSdkActivity {
 
     static final String MCC_MNC_PARAM_NAME = "mcc_mnc";
     static final String MCC_MNC_PARAM_SEP = "_";
@@ -75,7 +75,8 @@ public class ConnectActivityWithOperatorSelectionDelegate extends AbstractConnec
 
                     @Override
                     public void onError() {
-                        cancelAndShowErrorMessage(ConnectActivityWithOperatorSelectionDelegate.this);
+                        cancelAndShowErrorMessage(
+                                ConnectActivityDelegateWithOperatorSelection.this);
                     }
                 });
     }

@@ -41,9 +41,9 @@ public class OperatorSelectionWebViewClient extends WebViewClient {
     }
 
     private boolean validateRedirectUri(Uri uri) {
-        String mcc_mnc = uri.getQueryParameter(ConnectActivityWithOperatorSelectionDelegate.MCC_MNC_PARAM_NAME);
+        String mcc_mnc = uri.getQueryParameter(ConnectActivityDelegateWithOperatorSelection.MCC_MNC_PARAM_NAME);
         if (mcc_mnc != null) {
-            String[] mccAndMnc = mcc_mnc.split(ConnectActivityWithOperatorSelectionDelegate.MCC_MNC_PARAM_SEP);
+            String[] mccAndMnc = mcc_mnc.split(ConnectActivityDelegateWithOperatorSelection.MCC_MNC_PARAM_SEP);
             return (mccAndMnc.length == 2);
         }
         return false;

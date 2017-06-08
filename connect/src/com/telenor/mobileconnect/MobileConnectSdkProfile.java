@@ -21,7 +21,7 @@ import com.telenor.connect.utils.RestHelper;
 import com.telenor.mobileconnect.id.MobileConnectAPI;
 import com.telenor.mobileconnect.operatordiscovery.OperatorDiscoveryAPI;
 import com.telenor.mobileconnect.operatordiscovery.OperatorDiscoveryConfig;
-import com.telenor.mobileconnect.ui.ConnectActivityWithOperatorSelectionDelegate;
+import com.telenor.mobileconnect.ui.ConnectActivityDelegateWithOperatorSelection;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,7 +170,7 @@ public class MobileConnectSdkProfile extends AbstractSdkProfile {
                         }
                         final Intent intent = new Intent(
                                 getContext(),
-                                ConnectActivityWithOperatorSelectionDelegate.class
+                                ConnectActivityDelegateWithOperatorSelection.class
                         );
                         intent.setAction(ConnectUtils.OPERATOR_SELECTION_ACTION);
                         intent.putExtra(ConnectUtils.OPERATOR_SELECTION_URI, endpoint);
